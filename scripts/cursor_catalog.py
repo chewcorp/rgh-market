@@ -23,9 +23,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-DEFAULT_MARKET_REPO = "https://github.com/xchewtoyx/rgh-market"
+DEFAULT_MARKET_REPO = "https://github.com/chewcorp/rgh-market"
 DEFAULT_CATALOG_URL = (
-    "https://raw.githubusercontent.com/xchewtoyx/rgh-market/main/"
+    "https://raw.githubusercontent.com/chewcorp/rgh-market/main/"
     ".cursor-plugin/catalog.json"
 )
 CURSOR_SIDECAR_DIR = ".cursor-plugin"

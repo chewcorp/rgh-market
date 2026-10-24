@@ -1,7 +1,7 @@
 # rgh-market
 
-Claude Code plugin marketplace for [`rgh-sme`](https://github.com/xchewtoyx/rgh-sme)
-and [`rgh-pre`](https://github.com/xchewtoyx/rgh-pre) — Zettelkasten-style Agent
+Claude Code plugin marketplace for [`rgh-sme`](https://github.com/chewcorp/rgh-sme)
+and [`rgh-pre`](https://github.com/chewcorp/rgh-pre) — Zettelkasten-style Agent
 Plugins wiki bundles — plus [`bundle-curator`](plugins/bundle-curator), the
 harness-agnostic curation tooling those two repos (and future OKF wiki repos)
 share. The catalog is
@@ -17,7 +17,7 @@ install straight from git. `bundle-curator` is different — see
 ### Claude Code
 
 ```shell
-/plugin marketplace add xchewtoyx/rgh-market
+/plugin marketplace add chewcorp/rgh-market
 /plugin install rgh-sme@rgh-plugins
 /plugin install rgh-pre@rgh-plugins
 /plugin install bundle-curator@rgh-plugins
@@ -35,13 +35,13 @@ resolution looks for that file — without replacing the Agent Plugins
 
 **Team / Enterprise** (best for org-wide desktop + Cloud Agents when a plugin
 is marked Required): Dashboard → Plugins → Add Marketplace → Import from Repo
-→ `https://github.com/xchewtoyx/rgh-market`. Then set each plugin to Default
+→ `https://github.com/chewcorp/rgh-market`. Then set each plugin to Default
 On or Required.
 
 **CLI / desktop user marketplace:**
 
 ```shell
-agent plugin marketplace add https://github.com/xchewtoyx/rgh-market
+agent plugin marketplace add https://github.com/chewcorp/rgh-market
 ```
 
 Then install from `/plugin` or Customize. Local smoke-test without a
@@ -69,13 +69,13 @@ Cloud Agents → environment, or `.cursor/environment.json` `install` in a
 consuming repo):
 
 ```shell
-curl -fsSL https://raw.githubusercontent.com/xchewtoyx/rgh-market/main/scripts/install_cursor_plugins.py | python3 - --all
+curl -fsSL https://raw.githubusercontent.com/chewcorp/rgh-market/main/scripts/install_cursor_plugins.py | python3 - --all
 ```
 
 Subset:
 
 ```shell
-curl -fsSL https://raw.githubusercontent.com/xchewtoyx/rgh-market/main/scripts/install_cursor_plugins.py | python3 - rgh-sme rgh-pre
+curl -fsSL https://raw.githubusercontent.com/chewcorp/rgh-market/main/scripts/install_cursor_plugins.py | python3 - rgh-sme rgh-pre
 ```
 
 `python3 - --all` is required when piping: stdin is the script, so flags go
