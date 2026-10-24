@@ -38,7 +38,7 @@ def catalog_for(name: str, **extra) -> dict:
         "source": f"plugins/{name}",
         "skills": ["wiki-router"],
         "agents": [],
-        "git": {"url": "https://github.com/xchewtoyx/rgh-market", "path": f"plugins/{name}"},
+        "git": {"url": "https://github.com/chewcorp/rgh-market", "path": f"plugins/{name}"},
     }
     entry.update(extra)
     return {"name": "rgh-plugins", "plugins": [entry]}
@@ -150,7 +150,7 @@ def test_install_from_github_tarball_subdir(tmp_path):
         "bundle-curator",
         skills=["curate"],
         source="plugins/bundle-curator",
-        git={"url": "https://github.com/xchewtoyx/rgh-market", "path": "plugins/bundle-curator"},
+        git={"url": "https://github.com/chewcorp/rgh-market", "path": "plugins/bundle-curator"},
     )
     catalog_path = tmp_path / "catalog.json"
     catalog_path.write_text(json.dumps(catalog), encoding="utf-8")

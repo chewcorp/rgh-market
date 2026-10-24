@@ -15,7 +15,7 @@ so Cloud Agents pick them up even if plugin discovery is unavailable.
 Typical Cloud Agent environment.json:
 
     {
-      "install": "curl -fsSL https://raw.githubusercontent.com/xchewtoyx/rgh-market/main/scripts/install_cursor_plugins.py | python3 - --all"
+      "install": "curl -fsSL https://raw.githubusercontent.com/chewcorp/rgh-market/main/scripts/install_cursor_plugins.py | python3 - --all"
     }
 
 From a clone of this repo:
@@ -50,13 +50,13 @@ try:
 except ImportError:  # piped via curl — catalog helpers are inlined below as fallbacks
     cursor_catalog = None  # type: ignore[assignment]
 
-DEFAULT_MARKET_REPO = "https://github.com/xchewtoyx/rgh-market"
+DEFAULT_MARKET_REPO = "https://github.com/chewcorp/rgh-market"
 DEFAULT_CATALOG_URL = (
-    "https://raw.githubusercontent.com/xchewtoyx/rgh-market/main/"
+    "https://raw.githubusercontent.com/chewcorp/rgh-market/main/"
     ".cursor-plugin/catalog.json"
 )
 DEFAULT_GITHUB_TARBALL = (
-    "https://codeload.github.com/xchewtoyx/rgh-market/tar.gz/refs/heads/main"
+    "https://codeload.github.com/chewcorp/rgh-market/tar.gz/refs/heads/main"
 )
 
 Downloader = Callable[[str], bytes]

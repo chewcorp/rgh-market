@@ -13,8 +13,8 @@
       "source": "rgh-sme",
       "description": "Zettelkasten-style LLM wikis across a set of subject-matter domains, built from reference texts and packaged as Open Knowledge Format (OKF) bundles.",
       "version": "0.1.1",
-      "homepage": "https://github.com/xchewtoyx/rgh-sme",
-      "repository": "https://github.com/xchewtoyx/rgh-sme",
+      "homepage": "https://github.com/chewcorp/rgh-sme",
+      "repository": "https://github.com/chewcorp/rgh-sme",
       "license": "MIT",
       "keywords": [
         "zettelkasten",
@@ -35,8 +35,8 @@
       "source": "rgh-pre",
       "description": "Consumer wiki package for personal wellbeing and Personal Reliability Engineering: philosophy, mindset, telemetry-state, capacity-load, failure-modes, controls-design, incident-response, reliability-strategy.",
       "version": "0.1.0",
-      "homepage": "https://github.com/xchewtoyx/rgh-pre",
-      "repository": "https://github.com/xchewtoyx/rgh-pre",
+      "homepage": "https://github.com/chewcorp/rgh-pre",
+      "repository": "https://github.com/chewcorp/rgh-pre",
       "keywords": [
         "wellbeing",
         "personal-reliability-engineering",
@@ -62,8 +62,8 @@
       "source": "bundle-curator",
       "description": "Harness-agnostic curation tooling for Zettelkasten-style OKF wiki bundles: skills, shared agents, and scripts to onboard sources, dispatch domain curators, review charters, and drain scoring/landscape backlogs. Domain-agnostic \u2014 reads domain slugs from the consuming repo's okf-core.toml. Mastered directly in this repo (not vendored from Cloudsmith).",
       "version": "0.1.0",
-      "homepage": "https://github.com/xchewtoyx/rgh-market",
-      "repository": "https://github.com/xchewtoyx/rgh-market",
+      "homepage": "https://github.com/chewcorp/rgh-market",
+      "repository": "https://github.com/chewcorp/rgh-market",
       "license": "MIT",
       "keywords": [
         "zettelkasten",
@@ -86,8 +86,8 @@
       "source": "rgh-mms",
       "description": "Development control-plane agent surface for Russell's Mini-me Swarm: planner/implementor/reviewer/approver/researcher agents, delivery/review/research skills, and the canonical policy/roles/workflows they follow, self-contained with a layered per-repo config resolver.",
       "version": "0.1.1",
-      "homepage": "https://github.com/xchewtoyx/rgh-mms",
-      "repository": "https://github.com/xchewtoyx/rgh-mms",
+      "homepage": "https://github.com/chewcorp/rgh-mms",
+      "repository": "https://github.com/chewcorp/rgh-mms",
       "license": "Apache-2.0",
       "keywords": [
         "agents",
