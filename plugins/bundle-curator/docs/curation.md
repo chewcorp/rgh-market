@@ -243,10 +243,11 @@ explicit human/agent action, not automatic invalidation.
    (`python3 scripts/select-focused-candidates.py <domain> --min-confidence T`,
    deterministic):** reads all cached ratings for the domain (this run's new
    entries plus everything already cached), filters out paths already in
-   `curation/<domain-slug>.txt`, sorts the remainder descending by confidence,
-   and walks from the top, stopping at the first entry below `T`. Because the
-   list is sorted, one sub-threshold hit is sufficient to stop — no need to scan
-   the rest. Prints the surviving paths, highest confidence first. The
+   `curation/<domain-slug>.txt`, keeps the last line in file order for each
+   `(path, bundle)`, sorts that list descending by confidence, and walks from
+   the top, stopping at the first entry below `T`. Because the list is sorted,
+   one sub-threshold hit is sufficient to stop — no need to scan the rest.
+   Prints the surviving paths, highest confidence first. The
    supervisor takes at most the batch limit `N` from the top of that output;
    this is deterministic tooling, not researcher/supervisor reasoning.
 4. **Curate (domain curator, unchanged):** the curator reads each selected path

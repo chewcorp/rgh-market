@@ -3,10 +3,11 @@
 
 Reads the per-domain ratings cache written by `fleeting-researcher`
 (`ratings/<domain>.jsonl`), filters out paths already curated (per
-`curation/<domain>.txt`), sorts the remainder descending by confidence, and
-walks from the top, stopping at the first entry below `--min-confidence`.
-Because the list is sorted, one sub-threshold hit is sufficient to stop --
-no need to scan the rest (see docs/curation.md, Ratings cache).
+`curation/<domain>.txt`), keeps the last line in file order for each
+`(path, bundle)`, sorts that list descending by confidence, and walks from
+the top, stopping at the first entry below `--min-confidence`. Because the
+list is sorted, one sub-threshold hit is sufficient to stop -- no need to
+scan the rest (see docs/curation.md, Ratings cache).
 
 Prints the surviving candidate paths to stdout, one per line, highest
 confidence first. Prints nothing (exit 0) if no candidates qualify.
@@ -102,23 +103,50 @@ def sort_key(entry: dict) -> float:
 def select_candidates(
     entries: list[dict], curated_paths: set[str], min_confidence: float
 ) -> list[str]:
-    """Sort descending by confidence; walk from the top; stop at the first
-    entry below `min_confidence` (short-circuit -- entries after that point
-    are never inspected further, so a malformed entry beyond the cutoff
-    cannot break the run). Paths already in `curated_paths` are dropped
-    before sorting so they never count as a stopping point or a result.
+    """Drop curated paths, keep the latest line per (path, bundle), then
+    walk scores descending until the cutoff.
 
-    Duplicate paths above the cutoff (e.g. from manual cache edits/merges,
-    or a prior scoring bug) are deduplicated as the walk proceeds, keeping
-    only the first occurrence seen in descending-confidence order -- which
-    is also the highest-confidence occurrence for that path. This dedup is
-    applied during the walk, not before sorting, so it never changes which
-    entries the short-circuit break sees or where it stops.
+    Paths already in `curated_paths` are dropped first so they never count
+    as a stopping point or a result. A line whose `bundle` is neither
+    `None` nor a string is dropped in that same filter: a list or dict is
+    unhashable and must not be used as a collapse key. `None` and string
+    bundles stay valid keys. Ratings caches are append-only, so before
+    sorting, lines with a usable string path collapse to the last line in
+    file order for that `(path, bundle)` key (`bundle` is
+    `entry.get("bundle")`). A later line for a different bundle does not
+    replace an earlier line. Lines with no usable path stay in the list
+    and are not collapsed together.
+
+    The collapsed list is sorted descending by confidence. The walk stops
+    at the first entry below `min_confidence` (entries after that point
+    are never inspected further, so a malformed entry beyond the cutoff
+    cannot break the run). A line with no usable path is skipped. Each
+    path is emitted once.
     """
     remaining = [
-        entry for entry in entries if entry.get("path") not in curated_paths
+        entry for entry in entries
+        if entry.get("path") not in curated_paths
+        and (entry.get("bundle") is None or isinstance(entry.get("bundle"), str))
     ]
-    ranked = sorted(remaining, key=sort_key, reverse=True)
+
+    last_for_key: dict[tuple[str, object], int] = {}
+    for index, entry in enumerate(remaining):
+        path = entry.get("path")
+        if isinstance(path, str) and path:
+            last_for_key[(path, entry.get("bundle"))] = index
+
+    collapsed: list[dict] = []
+    for index, entry in enumerate(remaining):
+        path = entry.get("path")
+        if (
+            isinstance(path, str)
+            and path
+            and last_for_key[(path, entry.get("bundle"))] != index
+        ):
+            continue
+        collapsed.append(entry)
+
+    ranked = sorted(collapsed, key=sort_key, reverse=True)
 
     candidates: list[str] = []
     seen_paths: set[str] = set()
@@ -133,8 +161,8 @@ def select_candidates(
             # it was never a real "hit".
             continue
         if path in seen_paths:
-            # Duplicate of an already-kept (higher-or-equal confidence)
-            # occurrence -- skip without breaking the walk.
+            # Same path already emitted from another bundle that cleared
+            # the cutoff. Skip without breaking the walk.
             continue
         seen_paths.add(path)
         candidates.append(path)

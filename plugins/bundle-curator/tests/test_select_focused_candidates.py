@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -193,7 +195,12 @@ class TestNonFiniteConfidenceGate:
 
 
 class TestDuplicatePathDedup:
-    def test_duplicate_path_deduped_keeping_highest_confidence_occurrence(self):
+    def test_duplicate_path_keeps_latest_line_for_same_bundle(self):
+        """The latest line for a path and bundle replaces earlier scores.
+
+        dup.md is recorded at 0.99 and later at 0.85. The latest score is
+        0.85, so other.md at 0.9 sorts ahead of it.
+        """
         entries = [
             entry("dup.md", 0.99),
             entry("other.md", 0.9),
@@ -202,16 +209,12 @@ class TestDuplicatePathDedup:
         result = mod.select_candidates(
             entries, curated_paths=set(), min_confidence=0.7
         )
-        assert result == ["dup.md", "other.md"]
+        assert result == ["other.md", "dup.md"]
         assert result.count("dup.md") == 1
 
-    def test_dedup_keeps_sorted_first_occurrence_not_original_list_order(self):
-        # The lower-confidence "dup.md" entry appears first in `entries`,
-        # but the walk runs over the sorted-descending order, so the 0.95
-        # occurrence is inspected (and kept) before the 0.8 one. This
-        # confirms dedup is applied during the walk over sorted entries,
-        # not by naively keeping whichever occurrence came first in the
-        # input list.
+    def test_dedup_keeps_latest_line_not_original_list_order(self):
+        # The lower score is first in the file. The later 0.95 line is the
+        # one that remains after the (path, bundle) collapse.
         entries = [
             entry("dup.md", 0.8),
             entry("dup.md", 0.95),
@@ -222,11 +225,8 @@ class TestDuplicatePathDedup:
         assert result == ["dup.md"]
 
     def test_duplicate_above_threshold_does_not_break_the_walk(self):
-        # A naive fix that `break`s (instead of `continue`s) on a
-        # duplicate would silently truncate the walk right there, dropping
-        # legitimate later candidates like "other.md" -- and would also
-        # never reach "boundary.md" to prove the short-circuit still
-        # works. Duplicates must be skipped without disturbing the walk.
+        # The later dup.md line (0.9) is the one that remains. The walk
+        # must still reach other.md, and must still stop at boundary.md.
         entries = [
             entry("dup.md", 0.95),
             entry("dup.md", 0.9),
@@ -237,6 +237,106 @@ class TestDuplicatePathDedup:
             entries, curated_paths=set(), min_confidence=0.7
         )
         assert result == ["dup.md", "other.md"]
+
+
+HIGH_THEN_LOW = (
+    '{"path": "fleeting/a.md", "bundle": "observability", "confidence": 0.9}\n'
+    '{"path": "fleeting/a.md", "bundle": "observability", "confidence": 0.2}\n'
+)
+LOW_THEN_HIGH = (
+    '{"path": "fleeting/a.md", "bundle": "observability", "confidence": 0.2}\n'
+    '{"path": "fleeting/a.md", "bundle": "observability", "confidence": 0.9}\n'
+)
+
+
+class TestLatestRatingLineWins:
+    def test_later_lower_score_replaces_earlier_higher_score(
+        self, tmp_path: Path
+    ):
+        ratings = tmp_path / "observability.jsonl"
+        ratings.write_text(HIGH_THEN_LOW, encoding="utf-8")
+        entries = mod.load_ratings(ratings)
+        result = mod.select_candidates(
+            entries, curated_paths=set(), min_confidence=0.5
+        )
+        assert result == []
+
+    def test_later_higher_score_replaces_earlier_lower_score(
+        self, tmp_path: Path
+    ):
+        ratings = tmp_path / "observability.jsonl"
+        ratings.write_text(LOW_THEN_HIGH, encoding="utf-8")
+        entries = mod.load_ratings(ratings)
+        result = mod.select_candidates(
+            entries, curated_paths=set(), min_confidence=0.5
+        )
+        assert result == ["fleeting/a.md"]
+
+    def test_later_line_for_a_different_bundle_does_not_replace_earlier_line(
+        self,
+    ):
+        entries = [
+            entry("fleeting/a.md", 0.9, "observability"),
+            entry("fleeting/a.md", 0.2, "other"),
+        ]
+        result = mod.select_candidates(
+            entries, curated_paths=set(), min_confidence=0.5
+        )
+        assert result == ["fleeting/a.md"]
+
+
+def write_run(tmp_path: Path, ratings_text: str) -> Path:
+    """Bundle dir, ledger, and ratings file under a temporary run root.
+
+    This script locates the repo from ``__file__`` rather than the process
+    cwd, so the invoked copy lives under the run.
+    """
+    run = tmp_path / "run"
+    (run / "observability").mkdir(parents=True)
+    (run / "curation").mkdir()
+    (run / "ratings").mkdir()
+    (run / "scripts").mkdir()
+    (run / "okf-core.toml").write_text(
+        '[bundles.observability]\npath = "observability"\n',
+        encoding="utf-8",
+    )
+    (run / "curation" / "observability.txt").write_text("", encoding="utf-8")
+    (run / "ratings" / "observability.jsonl").write_text(
+        ratings_text, encoding="utf-8"
+    )
+    shutil.copy(SCRIPT, run / "scripts" / "select-focused-candidates.py")
+    return run
+
+
+def run_select(run: Path) -> subprocess.CompletedProcess[str]:
+    script = run / "scripts" / "select-focused-candidates.py"
+    return subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "observability",
+            "--min-confidence",
+            "0.5",
+        ],
+        cwd=run,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+class TestLatestScoreCli:
+    def test_later_lower_score_exits_zero_with_empty_stdout(
+        self, tmp_path: Path
+    ):
+        result = run_select(write_run(tmp_path, HIGH_THEN_LOW))
+        assert result.returncode == 0, result.stderr
+        assert result.stdout == ""
+
+    def test_later_higher_score_prints_path(self, tmp_path: Path):
+        result = run_select(write_run(tmp_path, LOW_THEN_HIGH))
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.splitlines() == ["fleeting/a.md"]
 
 
 class TestMinConfidenceType:
