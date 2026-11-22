@@ -127,14 +127,12 @@
         "curate",
         "onboard",
         "progress",
-        "score-catchup",
-        "source-watch"
+        "score-catchup"
       ],
       "agents": [
         "chapter-writer",
         "charter-researcher",
-        "fleeting-researcher",
-        "source-watch-researcher"
+        "fleeting-researcher"
       ],
       "git": {
         "url": "https://github.com/chewcorp/rgh-market",
