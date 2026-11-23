@@ -30,7 +30,7 @@ its own tree (none of this ships here):
   scope / Boundaries) and curation persona. Domain-specific by nature; not
   something a shared plugin can supply.
 - `fleeting/`, `curation/<slug>.txt`, `ratings/<slug>.jsonl`,
-  `landscape/overlap.jsonl`, `watch/<slug>.jsonl`, and the domain bundle
+  `landscape/overlap.jsonl`, and the domain bundle
   directories themselves — all repo-local curation state these skills read
   and append to.
 - The `okf` CLI (install path: `.venv/bin/okf`, see `scripts/setup.sh` in
@@ -42,11 +42,11 @@ its own tree (none of this ships here):
 ## Layout
 
 - `skills/` — `onboard`, `curate`, `progress`, `charter-review`, `catch-up`,
-  `score-catchup`, `source-watch`. Each `SKILL.md` is the full harness-facing
+  `score-catchup`. Each `SKILL.md` is the full harness-facing
   procedure.
 - `agents/` — the domain-agnostic agents skills dispatch to:
   `fleeting-researcher` (charter-scoring and landscape-mapping modes),
-  `charter-researcher`, `chapter-writer`, `source-watch-researcher`. Per-domain
+  `charter-researcher`, `chapter-writer`. Per-domain
   `<slug>-curator` agents are not here — they're consuming-repo content.
 - `scripts/` — deterministic selection/reporting tooling the skills shell out
   to (candidate selection, progress reporting, chapter dumping, etc.). Pure
@@ -54,7 +54,7 @@ its own tree (none of this ships here):
   `okf-core.toml`), so they work unmodified from wherever a harness installs
   this plugin.
 - `docs/` — the detailed procedures (`curation.md`, `landscape.md`,
-  `charter-review.md`, `wiki-rules.md`, `source-watch.md`) the skills point to
+  `charter-review.md`, `wiki-rules.md`) the skills point to
   rather than restate.
 - `tests/` — pytest coverage for `scripts/`, ported alongside the scripts so
   this repo's own `pytest tests/ -v` (via `requirements-dev.txt` plus this
@@ -62,13 +62,11 @@ its own tree (none of this ships here):
 
 ## Provenance
 
-Ported from `rgh-pre` (canonical source for everything except `source-watch`,
-which only `rgh-sme` has today) as of the repos' `main` at extraction time.
+Ported from `rgh-pre` as of the repos' `main` at extraction time.
 Two real drifts between the two repos' copies were resolved in favour of
 `rgh-pre`'s newer version: a `fleeting/`-scan bug fix (stray top-level files
 under `fleeting/` are no longer treated as source notes) and consistent
 `P>=0.7` (at-or-above) confidence-threshold semantics, matching what the
-selection scripts actually gate on. `source-watch`'s implicit
-`agentic-engineering` default was replaced with a required `--focused
-<domain-slug>` argument, since a hardcoded default domain has no meaning
-across multiple consuming repos with different domain sets.
+selection scripts actually gate on.
+
+Source watch lives in `chewcorp/bundle-curation-ingest` (`source-watch/`).
